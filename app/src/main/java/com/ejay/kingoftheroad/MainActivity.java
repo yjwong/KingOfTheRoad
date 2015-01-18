@@ -2,16 +2,31 @@ package com.ejay.kingoftheroad;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.razer.android.nabuopensdk.NabuOpenSDK;
+import com.razer.android.nabuopensdk.interfaces.NabuAuthListener;
+import com.razer.android.nabuopensdk.models.Scope;
 
 
 public class MainActivity extends ActionBarActivity {
+    public final static String TAG = "MainActivity";
+    public final static String NABU_OPENSDK_CLIENT_ID = "379645d9a5baec1083e58a54ecc8ff8ab6d74216";
+    public final static String[] NABU_OPENSDK_SCOPE = new String[] { Scope.COMPLETE };
+
+    private NabuOpenSDK mNabuSDK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Set up the Nabu OpenSDK.
+        mNabuSDK = NabuOpenSDK.getInstance(this);
+        mNabuSDK.initiate(this, NABU_OPENSDK_CLIENT_ID, NABU_OPENSDK_SCOPE, new MyNabuAuthListener());
     }
 
 
@@ -35,5 +50,24 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Authentication listener for the Nabu SDK.
+     */
+    private class MyNabuAuthListener implements NabuAuthListener {
+        @Override
+        public void onAuthSuccess(String s) {
+            Log.d(TAG, "onAuthSuccess");
+            Toast.makeText(MainActivity.this, "Nabu authentication successful: " + s,
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onAuthFailed(String s) {
+            Log.d(TAG, "onAuthFailed");
+            Toast.makeText(MainActivity.this, "Nabu authentication failed: " + s,
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
