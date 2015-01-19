@@ -8,13 +8,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.razer.android.nabuopensdk.NabuOpenSDK;
+import com.razer.android.nabuopensdk.interfaces.BandListListener;
 import com.razer.android.nabuopensdk.interfaces.NabuAuthListener;
+import com.razer.android.nabuopensdk.models.NabuBand;
 import com.razer.android.nabuopensdk.models.Scope;
 
 
 public class MainActivity extends ActionBarActivity {
     public final static String TAG = "MainActivity";
-    public final static String NABU_OPENSDK_CLIENT_ID = "379645d9a5baec1083e58a54ecc8ff8ab6d74216";
     public final static String[] NABU_OPENSDK_SCOPE = new String[] { Scope.COMPLETE };
 
     private NabuOpenSDK mNabuSDK;
@@ -26,7 +27,8 @@ public class MainActivity extends ActionBarActivity {
 
         // Set up the Nabu OpenSDK.
         mNabuSDK = NabuOpenSDK.getInstance(this);
-        mNabuSDK.initiate(this, NABU_OPENSDK_CLIENT_ID, NABU_OPENSDK_SCOPE, new MyNabuAuthListener());
+        mNabuSDK.initiate(this, Constants.NABU_OPENSDK_CLIENT_ID, NABU_OPENSDK_SCOPE,
+                new MyNabuAuthListener());
     }
 
 
@@ -61,6 +63,7 @@ public class MainActivity extends ActionBarActivity {
             Log.d(TAG, "onAuthSuccess");
             Toast.makeText(MainActivity.this, "Nabu authentication successful: " + s,
                     Toast.LENGTH_SHORT).show();
+            mNabuSDK.getBandList(MainActivity.this, new MyNabuBandListListener());
         }
 
         @Override
@@ -68,6 +71,20 @@ public class MainActivity extends ActionBarActivity {
             Log.d(TAG, "onAuthFailed");
             Toast.makeText(MainActivity.this, "Nabu authentication failed: " + s,
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private class MyNabuBandListListener implements BandListListener {
+        @Override
+        public void onReceiveData(NabuBand[] nabuBands) {
+            for (NabuBand band : nabuBands) {
+                Log.d(TAG, "Band detected: " + band.name);
+            }
+        }
+
+        @Override
+        public void onReceiveFailed(String s) {
+
         }
     }
 }
