@@ -2,6 +2,7 @@ package com.ejay.kingoftheroad;
 
 import android.bluetooth.BluetoothGatt;
 import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +23,9 @@ import com.razer.android.nabuopensdk.models.NabuNotification;
 import com.razer.android.nabuopensdk.models.Scope;
 
 import java.util.Calendar;
+
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
 
 
 public class MainActivity extends ActionBarActivity {
