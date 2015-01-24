@@ -1,31 +1,28 @@
 package com.ejay.kingoftheroad;
 
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothGatt;
-import android.support.v7.app.ActionBarActivity;
-import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.razer.android.nabuopensdk.AuthCheckCallback;
 import com.razer.android.nabuopensdk.NabuOpenSDK;
 import com.razer.android.nabuopensdk.interfaces.BandListListener;
-import com.razer.android.nabuopensdk.interfaces.FitnessListener;
 import com.razer.android.nabuopensdk.interfaces.LiveDataListener;
 import com.razer.android.nabuopensdk.interfaces.NabuAuthListener;
-import com.razer.android.nabuopensdk.interfaces.SendNotificationListener;
 import com.razer.android.nabuopensdk.models.NabuBand;
 import com.razer.android.nabuopensdk.models.NabuFitness;
-import com.razer.android.nabuopensdk.models.NabuNotification;
 import com.razer.android.nabuopensdk.models.Scope;
-
-import java.util.Calendar;
-
-import com.google.android.gms.maps.*;
-import com.google.android.gms.maps.model.*;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -48,6 +45,9 @@ public class MainActivity extends ActionBarActivity {
     private NabuBand[] mNabuConnectedBands;
     private boolean mNabuGetConnectedBandsInProgress;
     private boolean mNabuLiveFitnessEnabled;
+    protected GoogleMap mMap;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +79,7 @@ public class MainActivity extends ActionBarActivity {
         } else {
             nabuGetAllBandList();
         }
+
     }
 
     @Override
@@ -164,6 +165,8 @@ public class MainActivity extends ActionBarActivity {
             mNabuSDK.getConnectedBandList(this, new MyNabuConnectedBandListListener());
         }
     }
+
+
 
     /**
      * Callback that is invoked when the authorization check is complete.
