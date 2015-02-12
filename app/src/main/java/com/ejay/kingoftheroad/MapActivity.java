@@ -44,6 +44,7 @@ public class MapActivity extends ActionBarActivity {
         fragmentTransaction.commit();
 
         mMapFragment.getMapAsync(new MapHandler());
+        setupMapIfNeeded();
     }
 
 
