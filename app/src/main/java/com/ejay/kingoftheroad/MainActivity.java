@@ -1,14 +1,12 @@
 package com.ejay.kingoftheroad;
 
 import android.bluetooth.BluetoothGatt;
-import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.razer.android.nabuopensdk.AuthCheckCallback;
@@ -77,19 +75,6 @@ public class MainActivity extends ActionBarActivity {
         } else {
             nabuGetAllBandList();
         }
-
-
-
-
-    }
-
-    private void populateNabuFitnessValues(int steps, int distance, int calories) {
-        TextView stepView = (TextView) findViewById(R.id.mainStepView);
-        TextView distanceView = (TextView) findViewById(R.id.mainDistanceView);
-        TextView caloriesView = (TextView) findViewById(R.id.mainCaloriesView);
-        stepView.setText(String.valueOf(steps));
-        distanceView.setText(String.valueOf(distance));
-        caloriesView.setText(String.valueOf(calories));
     }
 
     @Override
@@ -269,8 +254,6 @@ public class MainActivity extends ActionBarActivity {
             if (nabuBands.length > 0) {
                 mNabuSDK.enableFitness(MainActivity.this, nabuBands[0], new MyNabuLiveDataListener());
                 mNabuLiveFitnessEnabled = true;
-                TextView mainNameView = (TextView) findViewById(R.id.mainNameView);
-                mainNameView.setText(nabuBands[0].name);
             }
         }
 
@@ -295,10 +278,6 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onLiveDataReceived(NabuFitness nabuFitness) {
             Log.v(TAG, "onLiveDataReceived: " + nabuFitness.toString());
-            int steps = nabuFitness.fitness.steps;
-            int distance = nabuFitness.fitness.distanceWalked;
-            int calories = nabuFitness.fitness.calories;
-            populateNabuFitnessValues(steps, distance, calories);
         }
 
         @Override
