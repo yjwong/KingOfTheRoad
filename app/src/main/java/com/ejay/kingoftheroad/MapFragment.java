@@ -135,13 +135,14 @@ public class MapFragment extends Fragment {
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
                 public void onMyLocationChange(Location arg0) {
+                    mMap.clear();
                     mMap.addMarker(new MarkerOptions().position((new LatLng(arg0.getLatitude(), arg0.getLongitude()))).title("I am here!"));
                 }
             });
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), 8
             ));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(25),1500,null);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(17),1500,null);
         }
     }
 }
