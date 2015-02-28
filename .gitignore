@@ -4,6 +4,9 @@
 /.idea/libraries
 .DS_Store
 /build
-/app/src/main/java/com/ejay/kingoftheroad/Constants.java
 Thumbs.db
 *.log
+
+# These files contain API keys and are hence excluded.
+/app/src/main/java/com/ejay/kingoftheroad/Constants.java
+/app/src/debug/AndroidManifest.xml

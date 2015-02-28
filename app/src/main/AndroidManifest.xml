@@ -28,10 +28,6 @@
         </activity>
         <activity android:name="com.razer.android.nabuopensdk.ActivityWebView" />
 
-        <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAEci2oqnV-k3WZn9RgDH54oQ4cDDUck28" />
-
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map"
