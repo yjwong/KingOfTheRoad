@@ -5,3 +5,5 @@
 .DS_Store
 /build
 /app/src/main/java/com/ejay/kingoftheroad/Constants.java
+Thumbs.db
+*.log

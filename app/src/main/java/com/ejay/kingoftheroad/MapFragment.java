@@ -78,6 +78,7 @@ public class MapFragment extends Fragment {
                 .addOnConnectionFailedListener(new GoogleApiClientHandler())
                 .build();
 
+
         return rootView;
    }
 
@@ -140,6 +141,7 @@ public class MapFragment extends Fragment {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), 8
             ));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(25),1500,null);
         }
     }
 }
