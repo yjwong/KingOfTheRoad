@@ -1,9 +1,9 @@
 package com.ejay.kingoftheroad;
 
-import android.app.FragmentTransaction;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.bluetooth.BluetoothGatt;
 import android.content.res.Configuration;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,11 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.razer.android.nabuopensdk.AuthCheckCallback;
 import com.razer.android.nabuopensdk.NabuOpenSDK;
 import com.razer.android.nabuopensdk.interfaces.BandListListener;
@@ -124,7 +119,10 @@ public class MainActivity extends ActionBarActivity {
 
         drawerListView.setOnItemClickListener(new DrawerItemClickListener());
 
-
+        if (savedInstanceState == null) {
+            // on first time display view for first nav item
+            displayView(0);
+        }
     }
 
     @Override
@@ -144,9 +142,39 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
             Toast.makeText(MainActivity.this, ((TextView) view).getText(), Toast.LENGTH_LONG).show();
-            drawerLayout.closeDrawer(drawerListView);
+            displayView(position);
 
         }
+    }
+
+    private void displayView(int position) {
+
+        Fragment fragment = null;
+        switch(position) {
+            case 0:
+                fragment = new HomeScreen();
+                break;
+            case 1:
+                fragment = new MapFragment();
+                break;
+            default:
+                break;
+        }
+        if (fragment != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, fragment).commit();
+
+            // update selected item and title, then close the drawer
+            drawerListView.setItemChecked(position, true);
+            drawerListView.setSelection(position);
+            setTitle(drawerListViewItems[position]);
+            drawerLayout.closeDrawer(drawerListView);
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
+
     }
 
     @Override

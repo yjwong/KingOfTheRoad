@@ -8,8 +8,8 @@
     <string name="title_activity_map">MapActivity</string>
 
     <string-array name="items">
-        <item>Item 1</item>
-        <item>Item 2</item>
+        <item>Home</item>
+        <item>Maps</item>
         <item>Item 3</item>
         <item>Item 4</item>
         <item>Item 5</item>
@@ -18,6 +18,6 @@
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
