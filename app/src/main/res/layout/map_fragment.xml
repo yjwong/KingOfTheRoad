@@ -16,13 +16,16 @@
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="450dp"
         tools:layout="@layout/abc_action_bar_up_container" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:text="Map1"
-        android:id="@+id/textView" />
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/viewPager"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        </android.support.v4.view.ViewPager>
+
 
 </LinearLayout>

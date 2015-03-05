@@ -1,7 +1,7 @@
 package com.ejay.kingoftheroad;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.bluetooth.BluetoothGatt;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -161,7 +161,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
         if (fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, fragment).commit();
 
