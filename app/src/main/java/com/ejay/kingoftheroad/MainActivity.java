@@ -1,25 +1,26 @@
 package com.ejay.kingoftheroad;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.bluetooth.BluetoothGatt;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.razer.android.nabuopensdk.AuthCheckCallback;
 import com.razer.android.nabuopensdk.NabuOpenSDK;
 import com.razer.android.nabuopensdk.interfaces.BandListListener;
@@ -50,12 +51,13 @@ public class MainActivity extends ActionBarActivity {
     private NabuBand[] mNabuConnectedBands;
     private boolean mNabuGetConnectedBandsInProgress;
     private boolean mNabuLiveFitnessEnabled;
-    protected GoogleMap mMap;
 
-    private String[] drawerListViewItems;
-    private DrawerLayout drawerLayout;
-    private ListView drawerListView;
-    private ActionBarDrawerToggle actionBarDrawerToggle;
+    private Toolbar mToolbar;
+    private String[] mDrawerListViewItems;
+    private DrawerLayout mDrawerLayout;
+    private LinearLayout mDrawer;
+    private ListView mDrawerListView;
+    private ActionBarDrawerToggle mActionBarDrawerToggle;
     // nav drawer title
     private CharSequence mDrawerTitle;
     // used to store app title
@@ -65,6 +67,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Set up the toolbar.
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         mTitle = mDrawerTitle = getTitle();
 
@@ -95,21 +101,23 @@ public class MainActivity extends ActionBarActivity {
         }
 
         // get list items from strings.xml
-        drawerListViewItems = getResources().getStringArray(R.array.items);
+        mDrawerListViewItems = getResources().getStringArray(R.array.items);
         // get ListView defined in activity_main.xml
-        drawerListView = (ListView) findViewById(R.id.left_drawer);
+        mDrawerListView = (ListView) findViewById(R.id.drawer_list_view);
+        mDrawer = (LinearLayout) findViewById(R.id.drawer);
 
         // Set the adapter for the list view
-        drawerListView.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, drawerListViewItems));
+        mDrawerListView.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mDrawerListViewItems));
 
         // 2. App Icon
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         // 2.1 create ActionBarDrawerToggle
-        actionBarDrawerToggle = new ActionBarDrawerToggle(
+        mActionBarDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
-                drawerLayout,         /* DrawerLayout object */
+                mDrawerLayout,         /* DrawerLayout object */
+                mToolbar,
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
         ){
@@ -127,16 +135,16 @@ public class MainActivity extends ActionBarActivity {
         }
         ;
 
-        // 2.2 Set actionBarDrawerToggle as the DrawerListener
-        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        // 2.2 Set mActionBarDrawerToggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mActionBarDrawerToggle);
 
         // 2.3 enable and show "up" arrow
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // just styling option
-        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        drawerListView.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerListView.setOnItemClickListener(new DrawerItemClickListener());
 
         if (savedInstanceState == null) {
             // on first time display view for first nav item
@@ -148,13 +156,13 @@ public class MainActivity extends ActionBarActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        actionBarDrawerToggle.syncState();
+        mActionBarDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        actionBarDrawerToggle.onConfigurationChanged(newConfig);
+        mActionBarDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -185,10 +193,10 @@ public class MainActivity extends ActionBarActivity {
                     .replace(R.id.content_frame, fragment).commit();
 
             // update selected item and title, then close the drawer
-            drawerListView.setItemChecked(position, true);
-            drawerListView.setSelection(position);
-            setTitle(drawerListViewItems[position]);
-            drawerLayout.closeDrawer(drawerListView);
+            mDrawerListView.setItemChecked(position, true);
+            mDrawerListView.setSelection(position);
+            setTitle(mDrawerListViewItems[position]);
+            mDrawerLayout.closeDrawer(mDrawer);
         } else {
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
@@ -253,7 +261,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // if nav drawer is opened, hide the action items
-        boolean drawerOpen = drawerLayout.isDrawerOpen(drawerListView);
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawer);
         menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -266,7 +274,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         // toggle nav drawer on selecting action bar app icon/title
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+        if (mActionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         //noinspection SimplifiableIfStatement
