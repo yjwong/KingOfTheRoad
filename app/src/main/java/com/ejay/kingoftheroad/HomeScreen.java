@@ -1,15 +1,12 @@
 package com.ejay.kingoftheroad;
 
 import android.app.Activity;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
-<<<<<<< HEAD
 import android.support.v4.app.Fragment;
-=======
-import android.app.Fragment;
+
 import android.util.Log;
->>>>>>> 6ef7ba982bb6818da899511dc1608860475d051c
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
