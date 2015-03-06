@@ -1,7 +1,11 @@
 package com.ejay.kingoftheroad;
 
 import android.bluetooth.BluetoothGatt;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,13 +15,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,9 +34,13 @@ import com.razer.android.nabuopensdk.NabuOpenSDK;
 import com.razer.android.nabuopensdk.interfaces.BandListListener;
 import com.razer.android.nabuopensdk.interfaces.LiveDataListener;
 import com.razer.android.nabuopensdk.interfaces.NabuAuthListener;
+import com.razer.android.nabuopensdk.interfaces.UserProfileListener;
 import com.razer.android.nabuopensdk.models.NabuBand;
 import com.razer.android.nabuopensdk.models.NabuFitness;
 import com.razer.android.nabuopensdk.models.Scope;
+import com.razer.android.nabuopensdk.models.UserProfile;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -53,6 +65,8 @@ public class MainActivity extends ActionBarActivity {
     private boolean mNabuLiveFitnessEnabled;
 
     private Toolbar mToolbar;
+    private Spinner mDrawerBandSelectionSpinner;
+    private DrawerBandSelectionAdapter mDrawerBandSelectionAdapter;
     private String[] mDrawerListViewItems;
     private DrawerLayout mDrawerLayout;
     private LinearLayout mDrawer;
@@ -62,6 +76,7 @@ public class MainActivity extends ActionBarActivity {
     private CharSequence mDrawerTitle;
     // used to store app title
     private CharSequence mTitle;
+    private RelativeLayout mDrawerUserRelativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +112,14 @@ public class MainActivity extends ActionBarActivity {
                 mNabuSDK.checkAppAuthorized(this, new MyNabuAuthCheckCallback());
             }
         } else {
-            nabuGetAllBandList();
+            nabuRunPostAuthActions();
         }
+
+        // Set up the navigation drawer.
+        mDrawerUserRelativeLayout = (RelativeLayout) findViewById(R.id.drawer_user_relative_layout);
+        mDrawerBandSelectionAdapter = new DrawerBandSelectionAdapter(this);
+        mDrawerBandSelectionSpinner = (Spinner) findViewById(R.id.drawer_band_selection_spinner);
+        mDrawerBandSelectionSpinner.setAdapter(mDrawerBandSelectionAdapter);
 
         // get list items from strings.xml
         mDrawerListViewItems = getResources().getStringArray(R.array.items);
@@ -285,9 +306,10 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void nabuGetAllBandList() {
+    private void nabuRunPostAuthActions() {
         nabuGetBandList();
         nabuGetConnectedBandList();
+        nabuGetUserProfile();
     }
 
     private void nabuGetBandList() {
@@ -304,7 +326,9 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-
+    private void nabuGetUserProfile() {
+        mNabuSDK.getUserProfile(this, new MyNabuUserProfileListener());
+    }
 
     /**
      * Callback that is invoked when the authorization check is complete.
@@ -324,7 +348,7 @@ public class MainActivity extends ActionBarActivity {
                     NABU_OPENSDK_SCOPE, new MyNabuAuthListener());
             //mNabuSDKAuthorized = true;
             //mNabuSDKAuthorizationInProgress = false;
-            //nabuGetAllBandList();
+            //nabuRunPostAuthActions();
         }
 
         @Override
@@ -346,7 +370,7 @@ public class MainActivity extends ActionBarActivity {
             Log.v(TAG, "onAuthSuccess: " + s);
             mNabuSDKAuthorized = true;
             mNabuSDKAuthorizationInProgress = false;
-            nabuGetAllBandList();
+            nabuRunPostAuthActions();
         }
 
         @Override
@@ -367,6 +391,7 @@ public class MainActivity extends ActionBarActivity {
             mNabuGetBandsInProgress = false;
 
             // Print debugging information.
+            mDrawerBandSelectionAdapter.addAll(nabuBands);
             for (NabuBand band : nabuBands) {
                 Log.d(TAG, "Band detected: " + band.toString());
             }
@@ -429,6 +454,69 @@ public class MainActivity extends ActionBarActivity {
         public void onError(String errorMessage) {
             Log.w(TAG, "onError: " + errorMessage);
             mNabuLiveFitnessEnabled = false;
+        }
+    }
+
+    private class MyNabuUserProfileListener implements UserProfileListener {
+        @Override
+        public void onReceiveData(UserProfile profile) {
+            // Set the avatar in the navigation drawer.
+            Picasso.with(MainActivity.this).load(profile.avatarUrl)
+                    .placeholder(R.drawable.user_avatar_default_bg_repeat)
+                    .into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            BitmapDrawable drawable = new BitmapDrawable(getResources(), bitmap);
+                            mDrawerUserRelativeLayout.setBackground(drawable);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(Drawable errorDrawable) {
+                            mDrawerUserRelativeLayout.setBackground(errorDrawable);
+                        }
+
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                            mDrawerUserRelativeLayout.setBackground(placeHolderDrawable);
+                        }
+                    });
+        }
+
+        @Override
+        public void onReceiveFailed(String s) {
+
+        }
+    }
+
+    private class DrawerBandSelectionAdapter extends ArrayAdapter<NabuBand> {
+        public DrawerBandSelectionAdapter(Context context) {
+            super(context, R.layout.drawer_band_selection_spinner_item, R.id.band_name);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            NabuBand band = getItem(position);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_item, parent, false);
+            }
+
+            TextView tvBandName = (TextView) convertView.findViewById(R.id.band_name);
+            tvBandName.setText(band.name);
+
+            return convertView;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            NabuBand band = getItem(position);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_item, parent, false);
+            }
+
+            TextView tvBandName = (TextView) convertView.findViewById(R.id.band_name);
+            tvBandName.setText(band.name);
+
+            return convertView;
         }
     }
 }
