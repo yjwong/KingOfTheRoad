@@ -56,11 +56,17 @@ public class MainActivity extends ActionBarActivity {
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    // nav drawer title
+    private CharSequence mDrawerTitle;
+    // used to store app title
+    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTitle = mDrawerTitle = getTitle();
 
         // Set up the Nabu OpenSDK.
         Log.i(TAG, "Initializing Nabu OpenSDK...");
@@ -106,7 +112,20 @@ public class MainActivity extends ActionBarActivity {
                 drawerLayout,         /* DrawerLayout object */
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
-        );
+        ){
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(mTitle);
+                // calling onPrepareOptionsMenu() to show action bar icons
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                getSupportActionBar().setTitle(mDrawerTitle);
+                // calling onPrepareOptionsMenu() to hide action bar icons
+                invalidateOptionsMenu();
+            }
+        }
+        ;
 
         // 2.2 Set actionBarDrawerToggle as the DrawerListener
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
@@ -227,6 +246,18 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
+
+    /* *
+	 * Called when invalidateOptionsMenu() is triggered
+	 */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // if nav drawer is opened, hide the action items
+        boolean drawerOpen = drawerLayout.isDrawerOpen(drawerListView);
+        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -234,6 +265,10 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        // toggle nav drawer on selecting action bar app icon/title
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;

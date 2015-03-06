@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 //package com.ejay.kingoftheroad;
 /**
  * Created by JohnKuan on 25/1/2015.
@@ -177,13 +179,17 @@ public class MapFragment extends Fragment {
         @Override
         public Fragment getItem(int position) {
 
+            //obtain a list of record using user_id from server
+           //TODO
 
+            MapRecord mR = new MapRecord();
+            MapRecord mR1 = new MapRecord("456","Mr La", "13.30min", "2.4Km", new ArrayList<MarkerOptions>());
 
             switch (position) {
                 case 0:
-                    return SwipeMapInfoFragment.newInstance("test");
+                    return SwipeMapInfoFragment.newInstance(mR);
                 case 1:
-                    return SwipeMapInfoFragment.newInstance("testing2");
+                    return SwipeMapInfoFragment.newInstance(mR1);
 
             }
             return null;
@@ -201,20 +207,31 @@ public class MapFragment extends Fragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.swipe_map_info_fragment, container, false);
 
-            TextView tv = (TextView) v.findViewById(R.id.textView);
-            tv.setText(getArguments().getString("msg"));
-            TextView tv2 = (TextView) v.findViewById(R.id.titleText);
-            tv2.setText(getArguments().getString("title"));
+            TextView tv = (TextView) v.findViewById(R.id.titleText);
+            tv.setText(getArguments().getString("title"));
+            tv = (TextView) v.findViewById(R.id.id);
+            tv.setText(getArguments().getString("id"));
+            tv = (TextView) v.findViewById(R.id.kingName);
+            tv.setText(getArguments().getString("kingName"));
+            tv = (TextView) v.findViewById(R.id.bestTiming);
+            tv.setText(getArguments().getString("bestTiming"));
+            tv = (TextView) v.findViewById(R.id.distance);
+            tv.setText(getArguments().getString("distance"));
 
             return v;
         }
 
-        public static SwipeMapInfoFragment newInstance(String text) {
+        public static SwipeMapInfoFragment newInstance(MapRecord rx) {
 
             SwipeMapInfoFragment f = new SwipeMapInfoFragment();
             Bundle b = new Bundle();
-            b.putString("msg", text);
+
             b.putString("title", "Route");
+            b.putString("id", rx.getId());
+            b.putString("kingName",rx.getKingName());
+            b.putString("bestTiming", rx.getBestTiming());
+            b.putString("distance", rx.getDistance());
+
 
             f.setArguments(b);
 
