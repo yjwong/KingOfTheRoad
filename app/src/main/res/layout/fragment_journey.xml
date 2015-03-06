@@ -1,0 +1,34 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context="com.ejay.kingoftheroad.JourneyFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:text="Journey Fragment" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join a route"
+            android:id="@+id/button_joinRoute"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:onClick="joinRoute"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create New Route"
+            android:id="@+id/button_createRoute"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:onClick="createRoute"/>
+    </LinearLayout>
+
+</FrameLayout>

@@ -43,14 +43,6 @@
         <!--map:uiZoomControls="false"-->
         <!--map:uiZoomGestures="true"/>-->
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button"
-            android:layout_alignParentBottom="true"
-            android:layout_alignEnd="@+id/map" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -72,8 +64,18 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Start Now!"
+            android:id="@+id/button_start"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_horizontal"
+            android:onClick="startNew"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Challenge"
-            android:id="@+id/button2" />
+            android:id="@+id/button_challenge"
+            android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
 </FrameLayout>

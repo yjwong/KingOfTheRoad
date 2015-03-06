@@ -4,28 +4,22 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
-<<<<<<< HEAD
-import android.support.v4.app.Fragment;
-=======
 import android.app.Fragment;
-import android.util.Log;
->>>>>>> 6ef7ba982bb6818da899511dc1608860475d051c
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HomeScreen.OnFragmentInteractionListener} interface
+ * {@link JourneyFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeScreen#newInstance} factory method to
+ * Use the {@link JourneyFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreen extends Fragment {
+public class JourneyFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -43,11 +37,11 @@ public class HomeScreen extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeScreen.
+     * @return A new instance of fragment JourneyFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeScreen newInstance(String param1, String param2) {
-        HomeScreen fragment = new HomeScreen();
+    public static JourneyFragment newInstance(String param1, String param2) {
+        JourneyFragment fragment = new JourneyFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -55,7 +49,7 @@ public class HomeScreen extends Fragment {
         return fragment;
     }
 
-    public HomeScreen() {
+    public JourneyFragment() {
         // Required empty public constructor
     }
 
@@ -72,14 +66,14 @@ public class HomeScreen extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_home_screen, container, false);
-        Button startButton = (Button) rootView.findViewById(R.id.button_start);
-        startButton.setOnClickListener(new View.OnClickListener() {
+        View rootView = inflater.inflate(R.layout.fragment_journey, container, false);
+        Button viewButton = (Button) rootView.findViewById(R.id.button_joinRoute);
+        viewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(getActivity(), "Button clicked!", Toast.LENGTH_LONG).show();
 
-                Fragment fragment = new JourneyFragment();
+                Fragment fragment = new RouteListFragment();
 
                 if (fragment != null) {
                     FragmentManager fragmentManager = getFragmentManager();
@@ -88,6 +82,23 @@ public class HomeScreen extends Fragment {
                 }
             }
         });
+
+        Button createButton = (Button) rootView.findViewById(R.id.button_createRoute);
+        createButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(getActivity(), "Button clicked!", Toast.LENGTH_LONG).show();
+
+                Fragment fragment = new CreateRouteFragment();
+
+                if (fragment != null) {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+                }
+            }
+        });
+
 
         return rootView;
     }
@@ -99,23 +110,25 @@ public class HomeScreen extends Fragment {
         }
     }
 
-//    @Override
-//    public void onAttach(Activity activity) {
-//        super.onAttach(activity);
-//        try {
-//            mListener = (OnFragmentInteractionListener) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
 
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
+/*
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+*/
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
