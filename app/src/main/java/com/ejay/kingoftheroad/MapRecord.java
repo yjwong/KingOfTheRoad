@@ -1,6 +1,5 @@
 package com.ejay.kingoftheroad;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
  */
 public class MapRecord {
     private String id ;
+    private String routeName;
     private String kingName;
     private String bestTiming;
     private String distance;
@@ -28,13 +28,13 @@ public class MapRecord {
     //Constructor to store a record of the activity of user after running
     public MapRecord(String ID, String KING_NAME, String BEST_TIMING, String DISTANCE, ArrayList<MarkerOptions> list){
         id = ID;
+
         kingName = KING_NAME;
         bestTiming = BEST_TIMING;
         distance = DISTANCE;
         listOfMarkers = list;
 
     }
-
 
     public String getId() {
         return id;
