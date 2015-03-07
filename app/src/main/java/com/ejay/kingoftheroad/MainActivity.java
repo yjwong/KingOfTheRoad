@@ -3,10 +3,9 @@ package com.ejay.kingoftheroad;
 import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -20,11 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +42,8 @@ import com.razer.android.nabuopensdk.models.NabuFitness;
 import com.razer.android.nabuopensdk.models.Scope;
 import com.razer.android.nabuopensdk.models.UserProfile;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+
+import java.util.zip.Inflater;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -54,6 +57,8 @@ public class MainActivity extends ActionBarActivity {
     private final static String STATE_KEY_NABU_CONNECTED_BANDS = "nabuConnectedBands";
     private final static String STATE_KEY_NABU_GET_CONNECTED_BANDS_IN_PROGRESS = "nabuGetConnectedBandsInProgress";
     private final static String STATE_KEY_NABU_LIVE_FITNESS_ENABLED = "nabuLiveFitnessEnabled";
+    private final static String STATE_KEY_NABU_USER_PROFILE = "nabuUserProfile";
+    private final static String STATE_KEY_NABU_GET_USER_PROFILE_IN_PROGRESS = "nabuGetUserProfileInProgress";
 
     private NabuOpenSDK mNabuSDK;
     private boolean mNabuSDKAuthorized;
@@ -63,6 +68,8 @@ public class MainActivity extends ActionBarActivity {
     private NabuBand[] mNabuConnectedBands;
     private boolean mNabuGetConnectedBandsInProgress;
     private boolean mNabuLiveFitnessEnabled;
+    private ParcelableUserProfile mNabuUserProfile;
+    private boolean mNabuGetUserProfileInProgress;
 
     private Toolbar mToolbar;
     private Spinner mDrawerBandSelectionSpinner;
@@ -76,7 +83,6 @@ public class MainActivity extends ActionBarActivity {
     private CharSequence mDrawerTitle;
     // used to store app title
     private CharSequence mTitle;
-    private RelativeLayout mDrawerUserRelativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +108,8 @@ public class MainActivity extends ActionBarActivity {
             mNabuConnectedBands = (NabuBand[]) savedInstanceState.getParcelableArray(STATE_KEY_NABU_CONNECTED_BANDS);
             mNabuGetConnectedBandsInProgress = savedInstanceState.getBoolean(STATE_KEY_NABU_GET_CONNECTED_BANDS_IN_PROGRESS);
             mNabuLiveFitnessEnabled = savedInstanceState.getBoolean(STATE_KEY_NABU_LIVE_FITNESS_ENABLED);
+            mNabuGetUserProfileInProgress = savedInstanceState.getBoolean(STATE_KEY_NABU_GET_USER_PROFILE_IN_PROGRESS);
+            mNabuUserProfile = savedInstanceState.getParcelable(STATE_KEY_NABU_USER_PROFILE);
         }
 
         // At this point, we are not sure if we have been authorized. So let's check.
@@ -115,12 +123,6 @@ public class MainActivity extends ActionBarActivity {
             nabuRunPostAuthActions();
         }
 
-        // Set up the navigation drawer.
-        mDrawerUserRelativeLayout = (RelativeLayout) findViewById(R.id.drawer_user_relative_layout);
-        mDrawerBandSelectionAdapter = new DrawerBandSelectionAdapter(this);
-        mDrawerBandSelectionSpinner = (Spinner) findViewById(R.id.drawer_band_selection_spinner);
-        mDrawerBandSelectionSpinner.setAdapter(mDrawerBandSelectionAdapter);
-
         // get list items from strings.xml
         mDrawerListViewItems = getResources().getStringArray(R.array.items);
         // get ListView defined in activity_main.xml
@@ -128,8 +130,14 @@ public class MainActivity extends ActionBarActivity {
         mDrawer = (LinearLayout) findViewById(R.id.drawer);
 
         // Set the adapter for the list view
+        mDrawerListView.addHeaderView(LayoutInflater.from(this).inflate(R.layout.drawer_list_view_header, null, false));
         mDrawerListView.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mDrawerListViewItems));
+
+        // Set up the navigation drawer.
+        mDrawerBandSelectionAdapter = new DrawerBandSelectionAdapter(this);
+        mDrawerBandSelectionSpinner = (Spinner) findViewById(R.id.drawer_band_selection_spinner);
+        mDrawerBandSelectionSpinner.setAdapter(mDrawerBandSelectionAdapter);
 
         // 2. App Icon
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -237,6 +245,8 @@ public class MainActivity extends ActionBarActivity {
         outState.putParcelableArray(STATE_KEY_NABU_CONNECTED_BANDS, mNabuConnectedBands);
         outState.putBoolean(STATE_KEY_NABU_GET_CONNECTED_BANDS_IN_PROGRESS, mNabuGetConnectedBandsInProgress);
         outState.putBoolean(STATE_KEY_NABU_LIVE_FITNESS_ENABLED, mNabuLiveFitnessEnabled);
+        outState.putBoolean(STATE_KEY_NABU_GET_USER_PROFILE_IN_PROGRESS, mNabuGetUserProfileInProgress);
+        outState.putParcelable(STATE_KEY_NABU_USER_PROFILE, mNabuUserProfile);
     }
 
     @Override
@@ -275,6 +285,14 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mDrawer)) {
+            mDrawerLayout.closeDrawer(mDrawer);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     /* *
 	 * Called when invalidateOptionsMenu() is triggered
@@ -327,7 +345,43 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void nabuGetUserProfile() {
-        mNabuSDK.getUserProfile(this, new MyNabuUserProfileListener());
+        if (!mNabuGetUserProfileInProgress) {
+            mNabuGetUserProfileInProgress = true;
+            mNabuSDK.getUserProfile(this, new MyNabuUserProfileListener());
+        }
+    }
+
+    private void checkIfNabuLoaded() {
+        if (mNabuBands != null && mNabuConnectedBands != null && mNabuUserProfile != null) {
+            Log.d(TAG, "All data from Nabu loaded.");
+
+            // Populate the user avatar.
+            Picasso.with(this).load(mNabuUserProfile.getUserProfile().avatarUrl)
+                    .into((ImageView) findViewById(R.id.drawer_user_avatar));
+
+            // Populate the band list.
+            mDrawerBandSelectionAdapter.addAll(mNabuBands);
+
+            // Stop the progress bar on the navigation area.
+            final ProgressBar progressBar = (ProgressBar) findViewById(R.id.drawer_user_progress_bar);
+            AlphaAnimation progressBarOutAnimation = new AlphaAnimation(1.0f, 0.0f);
+            progressBarOutAnimation.setDuration(500);
+            progressBarOutAnimation.setFillAfter(true);
+            progressBarOutAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) { }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
+
+            progressBar.startAnimation(progressBarOutAnimation);
+        }
     }
 
     /**
@@ -389,9 +443,9 @@ public class MainActivity extends ActionBarActivity {
 
             mNabuBands = nabuBands;
             mNabuGetBandsInProgress = false;
+            checkIfNabuLoaded();
 
             // Print debugging information.
-            mDrawerBandSelectionAdapter.addAll(nabuBands);
             for (NabuBand band : nabuBands) {
                 Log.d(TAG, "Band detected: " + band.toString());
             }
@@ -413,6 +467,7 @@ public class MainActivity extends ActionBarActivity {
 
             mNabuConnectedBands = nabuBands;
             mNabuGetConnectedBandsInProgress = false;
+            checkIfNabuLoaded();
 
             // Print debugging information.
             for (NabuBand band : nabuBands) {
@@ -462,48 +517,9 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onReceiveData(UserProfile profile) {
-            // Set the avatar in the navigation drawer.
-            Picasso.with(MainActivity.this).load(profile.avatarUrl)
-                    .placeholder(R.drawable.user_avatar_default_bg_repeat)
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            float layoutRatio = (float) mDrawerUserRelativeLayout.getWidth() / mDrawerUserRelativeLayout.getHeight();
-                            float bitmapRatio = (float) bitmap.getWidth() / bitmap.getHeight();
-
-                            // Check if the layout is fatter than bitmap, and scale and crop if necessary.
-                            float scalingFactor;
-                            if (layoutRatio > bitmapRatio) {
-                                scalingFactor = (float) mDrawerUserRelativeLayout.getWidth() / bitmap.getWidth();
-                            } else {
-                                scalingFactor = (float) mDrawerUserRelativeLayout.getHeight() / bitmap.getHeight();
-                            }
-
-                            int scaledWidth = (int) (bitmap.getWidth() * scalingFactor);
-                            int scaledHeight = (int) (bitmap.getHeight() * scalingFactor);
-                            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
-
-                            // Crop the middle of the avatar.
-                            int cropX = (scaledBitmap.getWidth() - mDrawerUserRelativeLayout.getWidth()) / 2;
-                            int cropY = (scaledBitmap.getHeight() - mDrawerUserRelativeLayout.getHeight()) / 2;
-                            Bitmap croppedBitmap = Bitmap.createBitmap(scaledBitmap, cropX, cropY,
-                                    mDrawerUserRelativeLayout.getWidth(), mDrawerUserRelativeLayout.getHeight());
-
-                            // Set the background to be the cropped drawable.
-                            BitmapDrawable drawable = new BitmapDrawable(getResources(), croppedBitmap);
-                            mDrawerUserRelativeLayout.setBackground(drawable);
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Drawable errorDrawable) {
-                            mDrawerUserRelativeLayout.setBackground(errorDrawable);
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                            mDrawerUserRelativeLayout.setBackground(placeHolderDrawable);
-                        }
-                    });
+            mNabuUserProfile = new ParcelableUserProfile(profile);
+            mNabuGetUserProfileInProgress = false;
+            checkIfNabuLoaded();
         }
 
         @Override
@@ -543,6 +559,67 @@ public class MainActivity extends ActionBarActivity {
             tvBandName.setText(band.name);
 
             return convertView;
+        }
+    }
+
+    private static class ParcelableUserProfile implements Parcelable {
+        private UserProfile mUserProfile = new UserProfile();
+
+        public ParcelableUserProfile(UserProfile profile) {
+            mUserProfile = profile;
+        }
+
+        private ParcelableUserProfile(Parcel in) {
+            mUserProfile.razerID = in.readString();
+            mUserProfile.avatarUrl = in.readString();
+            mUserProfile.birthDay = in.readString();
+            mUserProfile.birthMonth = in.readString();
+            mUserProfile.birtyYear = in.readString();
+            mUserProfile.firstname = in.readString();
+            mUserProfile.lastname = in.readString();
+            mUserProfile.nickName = in.readString();
+            mUserProfile.gender = in.readString();
+            mUserProfile.height = in.readString();
+            mUserProfile.weight = in.readString();
+            mUserProfile.unit = in.readString();
+        }
+
+        public UserProfile getUserProfile() {
+            return mUserProfile;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<ParcelableUserProfile> CREATOR =
+                new Creator<ParcelableUserProfile>() {
+                    @Override
+                    public ParcelableUserProfile createFromParcel(Parcel source) {
+                        return new ParcelableUserProfile(source);
+                    }
+
+                    @Override
+                    public ParcelableUserProfile[] newArray(int size) {
+                        return new ParcelableUserProfile[size];
+                    }
+                };
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mUserProfile.razerID);
+            dest.writeString(mUserProfile.avatarUrl);
+            dest.writeString(mUserProfile.birthDay);
+            dest.writeString(mUserProfile.birthMonth);
+            dest.writeString(mUserProfile.birtyYear);
+            dest.writeString(mUserProfile.firstname);
+            dest.writeString(mUserProfile.lastname);
+            dest.writeString(mUserProfile.nickName);
+            dest.writeString(mUserProfile.gender);
+            dest.writeString(mUserProfile.height);
+            dest.writeString(mUserProfile.weight);
+            dest.writeString(mUserProfile.unit);
         }
     }
 }

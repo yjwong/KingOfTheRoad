@@ -28,31 +28,13 @@
         android:layout_width="260dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:id="@+id/drawer_user_relative_layout"
-            android:layout_width="match_parent"
-            android:layout_height="172dp"
-            android:background="@drawable/user_avatar_default_bg_repeat"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
-
-            <Spinner
-                android:id="@+id/drawer_band_selection_spinner"
-                android:layout_height="48dp"
-                android:layout_width="match_parent"
-                android:layout_alignParentBottom="true">
-            </Spinner>
-
-        </RelativeLayout>
+        android:orientation="vertical"
+        android:background="#333">
 
         <ListView android:id="@+id/drawer_list_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:choiceMode="singleChoice"
-            android:background="#333"
             android:divider="@null" />
 
     </LinearLayout>
