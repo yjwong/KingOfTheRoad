@@ -458,6 +458,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private class MyNabuUserProfileListener implements UserProfileListener {
+        private final static String TAG = "MyNabuUserProfileListener";
+
         @Override
         public void onReceiveData(UserProfile profile) {
             // Set the avatar in the navigation drawer.
@@ -466,7 +468,29 @@ public class MainActivity extends ActionBarActivity {
                     .into(new Target() {
                         @Override
                         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            BitmapDrawable drawable = new BitmapDrawable(getResources(), bitmap);
+                            float layoutRatio = (float) mDrawerUserRelativeLayout.getWidth() / mDrawerUserRelativeLayout.getHeight();
+                            float bitmapRatio = (float) bitmap.getWidth() / bitmap.getHeight();
+
+                            // Check if the layout is fatter than bitmap, and scale and crop if necessary.
+                            float scalingFactor;
+                            if (layoutRatio > bitmapRatio) {
+                                scalingFactor = (float) mDrawerUserRelativeLayout.getWidth() / bitmap.getWidth();
+                            } else {
+                                scalingFactor = (float) mDrawerUserRelativeLayout.getHeight() / bitmap.getHeight();
+                            }
+
+                            int scaledWidth = (int) (bitmap.getWidth() * scalingFactor);
+                            int scaledHeight = (int) (bitmap.getHeight() * scalingFactor);
+                            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+
+                            // Crop the middle of the avatar.
+                            int cropX = (scaledBitmap.getWidth() - mDrawerUserRelativeLayout.getWidth()) / 2;
+                            int cropY = (scaledBitmap.getHeight() - mDrawerUserRelativeLayout.getHeight()) / 2;
+                            Bitmap croppedBitmap = Bitmap.createBitmap(scaledBitmap, cropX, cropY,
+                                    mDrawerUserRelativeLayout.getWidth(), mDrawerUserRelativeLayout.getHeight());
+
+                            // Set the background to be the cropped drawable.
+                            BitmapDrawable drawable = new BitmapDrawable(getResources(), croppedBitmap);
                             mDrawerUserRelativeLayout.setBackground(drawable);
                         }
 
@@ -490,18 +514,20 @@ public class MainActivity extends ActionBarActivity {
 
     private class DrawerBandSelectionAdapter extends ArrayAdapter<NabuBand> {
         public DrawerBandSelectionAdapter(Context context) {
-            super(context, R.layout.drawer_band_selection_spinner_item, R.id.band_name);
+            super(context, R.layout.drawer_band_selection_spinner_view, R.id.band_name);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             NabuBand band = getItem(position);
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_item, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_view, parent, false);
             }
 
             TextView tvBandName = (TextView) convertView.findViewById(R.id.band_name);
+            TextView tvBandModel = (TextView) convertView.findViewById(R.id.band_model);
             tvBandName.setText(band.name);
+            tvBandModel.setText(band.model);
 
             return convertView;
         }
@@ -510,7 +536,7 @@ public class MainActivity extends ActionBarActivity {
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
             NabuBand band = getItem(position);
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_item, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_drop_down_view, parent, false);
             }
 
             TextView tvBandName = (TextView) convertView.findViewById(R.id.band_name);
