@@ -4,14 +4,14 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/band_name"
+        android:id="@+id/user_nickname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-medium"
         android:textColor="@android:color/white" />
 
     <TextView
-        android:id="@+id/band_model"
+        android:id="@+id/band_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white" />

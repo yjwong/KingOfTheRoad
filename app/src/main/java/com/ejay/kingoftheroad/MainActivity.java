@@ -540,10 +540,10 @@ public class MainActivity extends ActionBarActivity {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.drawer_band_selection_spinner_view, parent, false);
             }
 
+            TextView tvUserNickname = (TextView) convertView.findViewById(R.id.user_nickname);
             TextView tvBandName = (TextView) convertView.findViewById(R.id.band_name);
-            TextView tvBandModel = (TextView) convertView.findViewById(R.id.band_model);
+            tvUserNickname.setText(mNabuUserProfile.getUserProfile().nickName);
             tvBandName.setText(band.name);
-            tvBandModel.setText(band.model);
 
             return convertView;
         }
