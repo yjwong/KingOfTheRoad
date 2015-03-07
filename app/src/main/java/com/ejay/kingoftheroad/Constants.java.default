@@ -5,4 +5,5 @@ package com.ejay.kingoftheroad;
  */
 public class Constants {
     public static final String NABU_OPENSDK_CLIENT_ID = "";
+    public static final String API_URL = "http://kingoftheroad.yjwong.name"
 }
