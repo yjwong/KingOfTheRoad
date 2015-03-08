@@ -8,6 +8,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 /**
  * Created by JohnKuan on 7/3/2015.
  */
@@ -17,6 +20,11 @@ public class UserDao {
     public interface FetchedCallback {
         void onFetchSuccess(User user);
         void onFetchFail();
+    }
+
+    public interface FetchedArrayCallback{
+        void onFetchArraySuccess(ArrayList<User> list);
+        void onFetchArrayFail();
     }
 
     public static void fetch(String id, final FetchedCallback callback){
@@ -101,6 +109,61 @@ public class UserDao {
                 callback.onFetchFail();
             }
         });
+    }
+
+    public static void fetchAllUser(final FetchedArrayCallback callback){
+
+        String url = Constants.API_URL + "/api/users";
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+                            ArrayList<User> list = new ArrayList<User>();
+                            JSONObject jsObj = response.getJSONObject("data");
+                            Iterator<String> keys = jsObj.keys();
+                            while (keys.hasNext()) {
+                                String key = keys.next();
+                                User user = new User();
+                                try {
+                                    JSONObject jsUser = jsObj.getJSONObject(key);
+
+                                    user.setFirstname(jsUser.get("firstname").toString());
+                                    user.setLastname(jsUser.get("lastname").toString());
+                                    user.setRazerid(jsUser.get("razerid").toString());
+                                    user.setNickName(jsUser.get("nickname").toString());
+                                    user.setAvatarUrl(jsUser.get("avatarurl").toString());
+                                    user.setBirthDay(jsUser.get("birthday").toString());
+                                    user.setBirthMonth(jsUser.get("birthmonth").toString());
+                                    user.setBirthYear(jsUser.get("birthyear").toString());
+                                    user.setGender(jsUser.get("gender").toString());
+                                    user.setHeight(jsUser.get("height").toString());
+                                    user.setWeight(jsUser.get("weight").toString());
+                                    user.setUnit(jsUser.get("unit").toString());
+                                    list.add(user);
+                                }catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            callback.onFetchArraySuccess(list);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            callback.onFetchArrayFail();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO Auto-generated method stub
+                        callback.onFetchArrayFail();
+                    }
+                });
+
     }
 
 }

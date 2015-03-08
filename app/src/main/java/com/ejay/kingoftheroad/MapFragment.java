@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +24,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -89,8 +86,21 @@ public class MapFragment extends Fragment {
         MapsInitializer.initialize(getActivity());
 
         // Set up the ViewPager.
-        ViewPager pager = (ViewPager) rootView.findViewById(R.id.viewPager);
-        pager.setAdapter(new MyPagerAdapter(getFragmentManager()));
+        final ViewPager pager = (ViewPager) rootView.findViewById(R.id.viewPager);
+        RouteDao dao = new RouteDao(getActivity());
+        dao.fetchAll(new RouteDao.FetchedArrayCallback() {
+            @Override
+            public void onFetchArraySuccess(ArrayList<Route> list) {
+                Log.i(TAG, "Fetched routes from server!");
+                MyPagerAdapter adapter = new MyPagerAdapter(getFragmentManager(), list);
+                pager.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFetchArrayFail() {
+                Log.d(TAG, "Failed fetching routes from server.");
+            }
+        });
 
         // Obtain an instance of Google API client.
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -172,33 +182,49 @@ public class MapFragment extends Fragment {
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
+        private ArrayList<Route> mRoutes;
+
+        public MyPagerAdapter(FragmentManager fm, ArrayList<Route> routes) {
             super(fm);
+            mRoutes = routes;
         }
 
         @Override
         public Fragment getItem(int position) {
-
-            //obtain a list of record using user_id from server
-           //TODO
-
-            MapRecord mR = new MapRecord();
-            MapRecord mR1 = new MapRecord("456","Mr La", "13.30min", "2.4Km", new ArrayList<MarkerOptions>());
-
-            switch (position) {
-                case 0:
-                    return SwipeMapInfoFragment.newInstance(mR);
-                case 1:
-                    return SwipeMapInfoFragment.newInstance(mR1);
-
-            }
-            return null;
+            return SwipeMapInfoFragment.newInstance(mRoutes.get(position));
+//
+//            //obtain a list of record using user_id from server
+//           //TODO
+//
+//            MapRecord mR = new MapRecord();
+//            MapRecord mR1 = new MapRecord("456","Mr La", "13.30min", "2.4Km", new ArrayList<MarkerOptions>());
+//            final Route temp;
+//            new RouteDao().fetch("1", new RouteDao.FetchedCallback() {
+//                @Override
+//                public void onFetchSuccess(Route route) {
+//                    temp = route;
+//                }
+//
+//                @Override
+//                public void onFetchFail() {
+//
+//                }
+//            });
+//
+//            switch (position) {
+//                case 0:
+//                    return SwipeMapInfoFragment.newInstance(mR);
+//                case 1:
+//                    return SwipeMapInfoFragment.newInstance(mR1);
+//
+//            }
+//            return null;
         }
 
 
         @Override
         public int getCount() {
-            return 2;
+            return mRoutes.size();
         }
     }
 
@@ -216,21 +242,21 @@ public class MapFragment extends Fragment {
             tv = (TextView) v.findViewById(R.id.bestTiming);
             tv.setText(getArguments().getString("bestTiming"));
             tv = (TextView) v.findViewById(R.id.distance);
-            tv.setText(getArguments().getString("distance"));
+            tv.setText(Double.toString(getArguments().getDouble("distance")));
 
             return v;
         }
 
-        public static SwipeMapInfoFragment newInstance(MapRecord rx) {
+        public static SwipeMapInfoFragment newInstance(Route route) {
 
             SwipeMapInfoFragment f = new SwipeMapInfoFragment();
             Bundle b = new Bundle();
 
             b.putString("title", "Route");
-            b.putString("id", rx.getId());
-            b.putString("kingName",rx.getKingName());
-            b.putString("bestTiming", rx.getBestTiming());
-            b.putString("distance", rx.getDistance());
+            b.putString("id", route.getId());
+            b.putString("kingName", route.getKingName());
+            b.putLong("bestTiming", route.getBestTiming());
+            b.putDouble("distance", route.getDistance());
 
 
             f.setArguments(b);

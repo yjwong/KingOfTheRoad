@@ -19,13 +19,18 @@ public class WaypointDao {
     public WaypointDao(){}
 
     public interface FetchedCallback {
-        void onFetchSuccess(ArrayList<Waypoint> arrList);
+        void onFetchSuccess(Waypoint waypoint);
         void onFetchFail();
     }
 
-    public void fetch(String id, final FetchedCallback callback){
+    public interface FetchedArrayCallback{
+        void onFetchArraySuccess(ArrayList<Waypoint> list);
+        void onFetchArrayFail();
+    }
 
-        String url = Constants.API_URL + "/api/routes/" + id;
+    public void fetch(String id, final FetchedArrayCallback callback){
+
+        String url = Constants.API_URL + "/api/waypoints/" + id;
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
@@ -43,11 +48,11 @@ public class WaypointDao {
                                 arrList.add(waypoint);
                             }
 
-                            callback.onFetchSuccess(arrList);
+                            callback.onFetchArraySuccess(arrList);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            callback.onFetchFail();
+                            callback.onFetchArrayFail();
                         }
 
                     }
@@ -56,36 +61,37 @@ public class WaypointDao {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // TODO Auto-generated method stub
-                        callback.onFetchFail();
+                        callback.onFetchArrayFail();
                     }
                 });
     }
 
     public void save(ArrayList<Waypoint> wp, final FetchedCallback callback){
 
-        String url = Constants.API_URL + "/api/routes/";
-        JSONArray list = new JSONArray();
+        String url = Constants.API_URL + "/api/waypoints/";
+        JSONObject requestbody = new JSONObject();
         JSONObject data = new JSONObject();
-        for(int i=0; i <wp.size(); i++ ) {
-            JSONObject jsObj = new JSONObject();
-            try {
-                jsObj.put("id", wp.get(i).getId());
-                jsObj.put("latitude", wp.get(i).getLatitude());
-                jsObj.put("longitude", wp.get(i).getLongitude());
-                list.put(jsObj);
-            } catch (JSONException e) {
-                callback.onFetchFail();
-                e.printStackTrace();
-            }
-
-        }
+//        for(int i=0; i <wp.size(); i++ ) {
+//            JSONObject jsObj = new JSONObject();
+//            try {
+//                jsObj.put("id", wp.get(i).getId());
+//                jsObj.put("latitude", wp.get(i).getLatitude());
+//                jsObj.put("longitude", wp.get(i).getLongitude());
+//                list.put(jsObj);
+//            } catch (JSONException e) {
+//                callback.onFetchFail();
+//                e.printStackTrace();
+//            }
+//
+//        }
         try {
-            data.put("data", list);
+            data.put("waypoints", wp);
+            requestbody.put("data",data);
         } catch (JSONException e) {
             e.printStackTrace();
-            callback.onFetchFail();
         }
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, data,
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestbody,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
@@ -99,9 +105,43 @@ public class WaypointDao {
         });
 
     }
-    public ArrayList<Waypoint> fetchAll(){
-        return null;
-    }
+//    public ArrayList<Waypoint> fetchAll(){
+//
+//        String url = Constants.API_URL + "/api/routes/";
+//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+//                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//
+//                        try {
+//                            JSONArray list = response.getJSONArray("data");
+//                            ArrayList<Waypoint> arrList = new ArrayList<Waypoint>();
+//                            for(int i=0;i<list.length();i++ ){
+//                                Waypoint waypoint = new Waypoint();
+//                                waypoint.setId(list.getJSONObject(i).get("id").toString());
+//                                waypoint.setLatitude(list.getJSONObject(i).getLong("latitude"));
+//                                waypoint.setLongitude(list.getJSONObject(i).getLong("longitude"));
+//                                arrList.add(waypoint);
+//                            }
+//
+//                            callback.onFetchSuccess(arrList);
+//
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                            callback.onFetchFail();
+//                        }
+//
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        // TODO Auto-generated method stub
+//                        callback.onFetchFail();
+//                    }
+//                });
+//    }
 
 
 
