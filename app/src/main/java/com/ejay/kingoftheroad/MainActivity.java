@@ -71,8 +71,6 @@ public class MainActivity extends ActionBarActivity {
     private ParcelableUserProfile mNabuUserProfile;
     private boolean mNabuGetUserProfileInProgress;
 
-    private Toolbar mToolbar;
-    private Spinner mDrawerBandSelectionSpinner;
     private DrawerBandSelectionAdapter mDrawerBandSelectionAdapter;
     private String[] mDrawerListViewItems;
     private DrawerLayout mDrawerLayout;
@@ -90,8 +88,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         // Set up the toolbar.
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         mTitle = mDrawerTitle = getTitle();
 
@@ -136,8 +134,8 @@ public class MainActivity extends ActionBarActivity {
 
         // Set up the navigation drawer.
         mDrawerBandSelectionAdapter = new DrawerBandSelectionAdapter(this);
-        mDrawerBandSelectionSpinner = (Spinner) findViewById(R.id.drawer_band_selection_spinner);
-        mDrawerBandSelectionSpinner.setAdapter(mDrawerBandSelectionAdapter);
+        Spinner drawerBandSelectionSpinner = (Spinner) findViewById(R.id.drawer_band_selection_spinner);
+        drawerBandSelectionSpinner.setAdapter(mDrawerBandSelectionAdapter);
 
         // 2. App Icon
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -146,7 +144,7 @@ public class MainActivity extends ActionBarActivity {
         mActionBarDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                mToolbar,
+                toolbar,
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
         ){
@@ -174,11 +172,6 @@ public class MainActivity extends ActionBarActivity {
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
         mDrawerListView.setOnItemClickListener(new DrawerItemClickListener());
-
-        if (savedInstanceState == null) {
-            // on first time display view for first nav item
-            displayView(0);
-        }
     }
 
     @Override
@@ -199,7 +192,6 @@ public class MainActivity extends ActionBarActivity {
         public void onItemClick(AdapterView parent, View view, int position, long id) {
             Toast.makeText(MainActivity.this, ((TextView) view).getText(), Toast.LENGTH_LONG).show();
             displayView(position);
-
         }
     }
 
@@ -207,10 +199,10 @@ public class MainActivity extends ActionBarActivity {
 
         Fragment fragment = null;
         switch(position) {
-            case 0:
+            case 1:
                 fragment = new HomeScreen();
                 break;
-            case 1:
+            case 2:
                 fragment = new MapFragment();
                 break;
             default:
@@ -381,6 +373,9 @@ public class MainActivity extends ActionBarActivity {
             });
 
             progressBar.startAnimation(progressBarOutAnimation);
+
+            // Display the main view.
+            displayView(1);
         }
     }
 
