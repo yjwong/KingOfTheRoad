@@ -1,9 +1,13 @@
 package com.ejay.kingoftheroad;
 
+import android.content.Context;
+
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +19,12 @@ import java.util.Iterator;
  * Created by JohnKuan on 7/3/2015.
  */
 public class UserDao {
-    public UserDao(){}
+
+    private RequestQueue mRequestQueue;
+
+    public UserDao(Context context){
+        mRequestQueue = Volley.newRequestQueue(context);
+    }
 
     public interface FetchedCallback {
         void onFetchSuccess(User user);
@@ -27,7 +36,7 @@ public class UserDao {
         void onFetchArrayFail();
     }
 
-    public static void fetch(String id, final FetchedCallback callback){
+    public void fetch(String id, final FetchedCallback callback){
         final User user = new User();
         String url = Constants.API_URL + "/api/users" + id;
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -69,6 +78,7 @@ public class UserDao {
                         callback.onFetchFail();
                     }
                 });
+        mRequestQueue.add(jsObjRequest);
     }
 
     public static void save(User user, final FetchedCallback callback){
@@ -111,7 +121,7 @@ public class UserDao {
         });
     }
 
-    public static void fetchAllUser(final FetchedArrayCallback callback){
+    public void fetchAllUser(final FetchedArrayCallback callback){
 
         String url = Constants.API_URL + "/api/users";
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -163,6 +173,7 @@ public class UserDao {
                         callback.onFetchArrayFail();
                     }
                 });
+        mRequestQueue.add(jsObjRequest);
 
     }
 

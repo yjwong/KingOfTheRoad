@@ -1,9 +1,13 @@
 package com.ejay.kingoftheroad;
 
+import android.content.Context;
+
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +20,11 @@ import java.util.ArrayList;
  */
 public class WaypointDao {
 
-    public WaypointDao(){}
+    private RequestQueue mRequestQueue;
+
+    public WaypointDao(Context context){
+        mRequestQueue = Volley.newRequestQueue(context);
+    }
 
     public interface FetchedCallback {
         void onFetchSuccess(Waypoint waypoint);
@@ -64,6 +72,7 @@ public class WaypointDao {
                         callback.onFetchArrayFail();
                     }
                 });
+        mRequestQueue.add(jsObjRequest);
     }
 
     public void save(ArrayList<Waypoint> wp, final FetchedCallback callback){
